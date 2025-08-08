@@ -53,20 +53,36 @@ Este proyecto busca cerrar la brecha entre la teoría matemática y la implement
 
 ```
 MathDrivenML/
-├── notebooks/
-│   ├── 01_linear_algebra/
-│   ├── 02_calculus/
-│   ├── 03_probability/
-│   └── 04_implementations/
-├── src/
-│   ├── linear_algebra/
-│   ├── optimization/
-│   ├── probability/
-│   └── ml_algorithms/
-├── data/
-├── tests/
+├── README.md
 ├── docs/
-└── requirements.txt
+│   ├── introduction.md
+│   ├── vectors.md
+│   ├── matrices.md
+│   ├── calculus.md
+│   ├── probability_statistics.md
+│   ├── linear_algebra.md
+│   └── machine_learning_basics.md
+├── notebooks/
+│   ├── 01_vectors_intro.ipynb
+│   ├── 02_matrix_operations.ipynb
+│   ├── 03_derivatives.ipynb
+│   ├── 04_probability_basics.ipynb
+│   └── 05_linear_regression_example.ipynb
+├── src/
+│   ├── vectors.py
+│   ├── matrices.py
+│   ├── calculus.py
+│   ├── probability.py
+│   └── ml_algorithms/
+│       ├── linear_regression.py
+│       ├── logistic_regression.py
+│       └── utils.py
+├── tests/
+│   ├── test_vectors.py
+│   ├── test_matrices.py
+│   └── test_ml_algorithms.py
+├── requirements.txt
+└── setup.py
 ```
 
 ## 🚀 Cómo Empezar
