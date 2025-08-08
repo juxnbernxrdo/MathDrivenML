@@ -175,154 +175,105 @@ Para convertir cualquier vector **v** en unitario:
 ---
 
 ## 10. Implementación en Python
-
-### 10.1. Clase Vector Básica
-
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from math import sqrt, atan2, degrees
 
-class Vector2D:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-    
-    def __add__(self, other):
-        return Vector2D(self.x + other.x, self.y + other.y)
-    
-    def __sub__(self, other):
-        return Vector2D(self.x - other.x, self.y - other.y)
-    
-    def __mul__(self, scalar):
-        return Vector2D(self.x * scalar, self.y * scalar)
-    
-    def magnitude(self):
-        return sqrt(self.x**2 + self.y**2)
-    
-    def normalize(self):
-        mag = self.magnitude()
-        if mag == 0:
-            return Vector2D(0, 0)
-        return Vector2D(self.x/mag, self.y/mag)
-    
-    def dot(self, other):
-        return self.x * other.x + self.y * other.y
-    
-    def angle(self):
-        return degrees(atan2(self.y, self.x))
-    
-    def distance_to(self, other):
-        return sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
-    
-    def project_onto(self, other):
-        dot_product = self.dot(other)
-        other_mag_squared = other.x**2 + other.y**2
-        if other_mag_squared == 0:
-            return Vector2D(0, 0)
-        scalar = dot_product / other_mag_squared
-        return other * scalar
-    
-    def __repr__(self):
-        return f"Vector2D({self.x:.2f}, {self.y:.2f})"
-```
-
-### 10.2. Visualización Avanzada
-
-```python
-def plot_vectors(*vectors, labels=None, colors=None, title="Operaciones Vectoriales"):
+def plot_vectors(vectors, colors=None, labels=None, show_info=False):
     """
-    Visualiza múltiples vectores con etiquetas y colores personalizados
-    """
-    fig, ax = plt.subplots(figsize=(10, 8))
+    Grafica vectores 2D o 3D desde el origen.
     
+    Parámetros:
+    - vectors: lista de arrays o tuplas con componentes de vectores [(x1, y1), (x2, y2), ...] o [(x1, y1, z1), ...]
+    - colors: lista opcional de colores para cada vector ['r', 'g', 'b', ...]
+    - labels: lista opcional de etiquetas para cada vector ['v1', 'v2', ...]
+    - show_info: bool, si True muestra magnitud y dirección en la etiqueta
+    """
+    
+    # Validación básica
+    if not vectors:
+        raise ValueError("La lista de vectores está vacía.")
+    
+    # Convertir a np.array y validar dimensiones
+    vectors = [np.array(v) for v in vectors]
+    dim = vectors[0].shape[0]
+    
+    if any(v.shape[0] != dim for v in vectors):
+        raise ValueError("Todos los vectores deben tener la misma dimensión.")
+    if dim not in (2, 3):
+        raise ValueError("Solo se soportan vectores 2D o 3D.")
+    
+    # Preparar figura
+    fig = plt.figure(figsize=(8, 8))
+    if dim == 3:
+        ax = fig.add_subplot(111, projection='3d')
+    else:
+        ax = fig.add_subplot(111)
+    
+    origin = np.zeros(dim)
+    
+    # Colores y etiquetas por defecto
     if colors is None:
-        colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown']
-    
+        colors = plt.cm.get_cmap('tab10').colors
     if labels is None:
         labels = [f'Vector {i+1}' for i in range(len(vectors))]
     
-    origin = np.array([0, 0])
+    # Ajustar límites y graficar
+    all_coords = np.array(vectors)
+    max_val = np.max(np.abs(all_coords)) * 1.2
     
-    for i, vector in enumerate(vectors):
-        if hasattr(vector, 'x'):  # Si es nuestra clase Vector2D
-            x, y = vector.x, vector.y
-        else:  # Si es un array de NumPy
-            x, y = vector[0], vector[1]
-            
-        ax.quiver(*origin, x, y, 
-                 angles='xy', scale_units='xy', scale=1, 
-                 color=colors[i % len(colors)], 
-                 label=f'{labels[i]}: ({x:.2f}, {y:.2f})',
-                 width=0.005, headwidth=3)
+    if dim == 2:
+        ax.set_xlim([-max_val, max_val])
+        ax.set_ylim([-max_val, max_val])
+        ax.axhline(0, color='black', linewidth=0.5)
+        ax.axvline(0, color='black', linewidth=0.5)
+        ax.grid(True)
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+    else:
+        ax.set_xlim([-max_val, max_val])
+        ax.set_ylim([-max_val, max_val])
+        ax.set_zlim([-max_val, max_val])
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
     
-    # Configuración del gráfico
-    max_val = max([max(abs(v.x), abs(v.y)) if hasattr(v, 'x') 
-                   else max(abs(v[0]), abs(v[1])) for v in vectors])
-    limit = max_val * 1.2
+    # Graficar vectores
+    for i, v in enumerate(vectors):
+        c = colors[i % len(colors)]
+        label = labels[i]
+        mag = np.linalg.norm(v)
+        
+        if dim == 2:
+            ax.quiver(*origin, v[0], v[1], angles='xy', scale_units='xy', scale=1, color=c)
+            if show_info:
+                angle_deg = np.degrees(np.arctan2(v[1], v[0]))
+                label += f"\n|v|={mag:.2f}, θ={angle_deg:.1f}°"
+            ax.text(v[0]*1.05, v[1]*1.05, label, color=c, fontsize=10)
+        else:
+            ax.quiver(*origin, v[0], v[1], v[2], length=mag, color=c, normalize=True)
+            if show_info:
+                label += f"\n|v|={mag:.2f}"
+            ax.text(v[0]*1.05, v[1]*1.05, v[2]*1.05, label, color=c, fontsize=10)
     
-    ax.set_xlim(-limit, limit)
-    ax.set_ylim(-limit, limit)
-    ax.grid(True, alpha=0.3)
-    ax.axhline(y=0, color='k', linewidth=0.5)
-    ax.axvline(x=0, color='k', linewidth=0.5)
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_title(title)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    ax.set_aspect('equal')
-    
+    ax.set_title(f'Visualización de Vectores {dim}D')
     plt.tight_layout()
     plt.show()
 
 # Ejemplo de uso
-v1 = Vector2D(3, 4)
-v2 = Vector2D(-2, 3)
-suma = v1 + v2
-diferencia = v1 - v2
-escalado = v1 * 0.5
+v2d_1 = (3, 4)
+v2d_2 = (-2, 5)
+v2d_3 = (5, -3)
 
-plot_vectors(v1, v2, suma, diferencia, escalado,
-            labels=['Vector A', 'Vector B', 'A + B', 'A - B', '0.5 × A'],
-            title='Operaciones Básicas con Vectores')
-```
+v3d_1 = (1, 2, 3)
+v3d_2 = (-1, 0, 4)
+v3d_3 = (3, -2, 1)
 
-### 10.3. Ejemplos Prácticos
+# Visualizar 2D
+plot_vectors([v2d_1, v2d_2, v2d_3], show_info=True)
 
-```python
-# Ejemplo 1: Operaciones básicas
-print("=== OPERACIONES BÁSICAS ===")
-v1 = Vector2D(3, 4)
-v2 = Vector2D(-1, 2)
-
-print(f"Vector 1: {v1}")
-print(f"Vector 2: {v2}")
-print(f"Suma: {v1 + v2}")
-print(f"Resta: {v1 - v2}")
-print(f"Escalar × 2: {v1 * 2}")
-print(f"Magnitud v1: {v1.magnitude():.2f}")
-print(f"Ángulo v1: {v1.angle():.2f}°")
-
-# Ejemplo 2: Producto punto y proyección
-print("\n=== PRODUCTO PUNTO Y PROYECCIÓN ===")
-dot_product = v1.dot(v2)
-print(f"Producto punto: {dot_product}")
-
-if dot_product == 0:
-    print("Los vectores son perpendiculares")
-elif dot_product > 0:
-    print("El ángulo entre vectores es agudo")
-else:
-    print("El ángulo entre vectores es obtuso")
-
-proyeccion = v1.project_onto(v2)
-print(f"Proyección de v1 sobre v2: {proyeccion}")
-
-# Ejemplo 3: Vector unitario
-print("\n=== VECTORES UNITARIOS ===")
-v1_unit = v1.normalize()
-print(f"Vector unitario de v1: {v1_unit}")
-print(f"Magnitud del vector unitario: {v1_unit.magnitude():.6f}")
+# Visualizar 3D
+plot_vectors([v3d_1, v3d_2, v3d_3], show_info=True)
 ```
 
 ---
