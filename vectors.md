@@ -369,6 +369,112 @@ Crea un sistema que:
 ### 💡 Soluciones
 
 ```python
+# Clase Vector2D para operaciones vectoriales
+import math
+
+class Vector2D:
+    def __init__(self, x, y):
+        self.x = float(x)
+        self.y = float(y)
+    
+    def __add__(self, other):
+        """Suma de vectores"""
+        return Vector2D(self.x + other.x, self.y + other.y)
+    
+    def __sub__(self, other):
+        """Resta de vectores"""
+        return Vector2D(self.x - other.x, self.y - other.y)
+    
+    def __mul__(self, scalar):
+        """Multiplicación por escalar"""
+        return Vector2D(self.x * scalar, self.y * scalar)
+    
+    def __rmul__(self, scalar):
+        """Multiplicación por escalar (orden inverso)"""
+        return self * scalar
+    
+    def __str__(self):
+        """Representación en string"""
+        return f"({self.x:.2f}, {self.y:.2f})"
+    
+    def __repr__(self):
+        """Representación para debugging"""
+        return f"Vector2D({self.x}, {self.y})"
+    
+    def magnitude(self):
+        """Magnitud del vector"""
+        return math.sqrt(self.x**2 + self.y**2)
+    
+    def dot(self, other):
+        """Producto punto con otro vector"""
+        return self.x * other.x + self.y * other.y
+    
+    def project_onto(self, other):
+        """Proyección de este vector sobre otro"""
+        if other.magnitude() == 0:
+            return Vector2D(0, 0)
+        scalar = self.dot(other) / (other.magnitude() ** 2)
+        return other * scalar
+    
+    def distance_to(self, other):
+        """Distancia euclidiana a otro vector"""
+        return math.sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
+    
+    def normalize(self):
+        """Vector unitario en la misma dirección"""
+        mag = self.magnitude()
+        if mag == 0:
+            return Vector2D(0, 0)
+        return Vector2D(self.x / mag, self.y / mag)
+
+def plot_vectors(*vectors, labels=None, title='Vectores'):
+    """
+    Función para visualizar vectores usando matplotlib
+    """
+    try:
+        import matplotlib.pyplot as plt
+        import numpy as np
+        
+        # Configurar la figura
+        plt.figure(figsize=(10, 8))
+        ax = plt.gca()
+        
+        # Colores para los vectores
+        colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown', 'pink', 'gray']
+        
+        # Graficar cada vector desde el origen
+        for i, vector in enumerate(vectors):
+            color = colors[i % len(colors)]
+            label = labels[i] if labels and i < len(labels) else f'Vector {i+1}'
+            
+            # Graficar el vector como una flecha
+            ax.quiver(0, 0, vector.x, vector.y, 
+                     angles='xy', scale_units='xy', scale=1, 
+                     color=color, label=label, alpha=0.7)
+            
+            # Agregar etiqueta al final del vector
+            ax.text(vector.x * 1.05, vector.y * 1.05, label, 
+                   fontsize=10, ha='center', va='center')
+        
+        # Configurar ejes
+        ax.set_xlim(-10, 10)
+        ax.set_ylim(-10, 10)
+        ax.axhline(y=0, color='k', linestyle='-', alpha=0.3)
+        ax.axvline(x=0, color='k', linestyle='-', alpha=0.3)
+        ax.grid(True, alpha=0.3)
+        ax.set_aspect('equal')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_title(title)
+        ax.legend()
+        
+        plt.tight_layout()
+        plt.show()
+        
+    except ImportError:
+        print("Matplotlib no está disponible. No se puede mostrar la gráfica.")
+        print("Instala matplotlib con: pip install matplotlib")
+
 # Solución Ejercicio 1
 print("=== EJERCICIO 1: OPERACIONES BÁSICAS ===")
 a = Vector2D(2, -3)
@@ -500,157 +606,6 @@ print("\nRecomendaciones ordenadas por similaridad:")
 for movie, similarity in recommended_movies:
     print(f"{movie}: {similarity:.3f}")
 ```
-
----
-
-## 🔧 Herramientas de Análisis Vectorial
-
-### Calculadora de Vectores Interactiva
-
-```python
-class VectorCalculator:
-    """Calculadora interactiva para operaciones vectoriales"""
-    
-    @staticmethod
-    def menu():
-        print("\n=== CALCULADORA DE VECTORES ===")
-        print("1. Suma de vectores")
-        print("2. Resta de vectores")
-        print("3. Producto punto")
-        print("4. Ángulo entre vectores")
-        print("5. Proyección vectorial")
-        print("6. Normalizar vector")
-        print("7. Distancia entre puntos")
-        print("8. Visualizar vectores")
-        print("0. Salir")
-    
-    @staticmethod
-    def get_vector_input(name):
-        x = float(input(f"Ingrese componente x de {name}: "))
-        y = float(input(f"Ingrese componente y de {name}: "))
-        return Vector2D(x, y)
-    
-    def run(self):
-        while True:
-            self.menu()
-            choice = input("\nSeleccione una opción: ")
-            
-            if choice == '0':
-                print("¡Hasta luego!")
-                break
-            elif choice == '1':
-                v1 = self.get_vector_input("vector 1")
-                v2 = self.get_vector_input("vector 2")
-                result = v1 + v2
-                print(f"Resultado: {v1} + {v2} = {result}")
-            elif choice == '2':
-                v1 = self.get_vector_input("vector 1")
-                v2 = self.get_vector_input("vector 2")
-                result = v1 - v2
-                print(f"Resultado: {v1} - {v2} = {result}")
-            elif choice == '3':
-                v1 = self.get_vector_input("vector 1")
-                v2 = self.get_vector_input("vector 2")
-                result = v1.dot(v2)
-                print(f"Producto punto: {result}")
-            elif choice == '4':
-                v1 = self.get_vector_input("vector 1")
-                v2 = self.get_vector_input("vector 2")
-                dot_product = v1.dot(v2)
-                magnitude_product = v1.magnitude() * v2.magnitude()
-                if magnitude_product != 0:
-                    cos_angle = dot_product / magnitude_product
-                    angle_rad = math.acos(min(1, max(-1, cos_angle)))
-                    angle_deg = math.degrees(angle_rad)
-                    print(f"Ángulo entre vectores: {angle_deg:.2f}°")
-                else:
-                    print("No se puede calcular el ángulo (vector cero)")
-            elif choice == '5':
-                v1 = self.get_vector_input("vector a proyectar")
-                v2 = self.get_vector_input("vector base")
-                proj = v1.project_onto(v2)
-                print(f"Proyección de {v1} sobre {v2} = {proj}")
-            elif choice == '6':
-                v = self.get_vector_input("vector")
-                normalized = v.normalize()
-                print(f"Vector normalizado: {normalized}")
-                print(f"Magnitud: {normalized.magnitude():.6f}")
-            elif choice == '7':
-                p1 = self.get_vector_input("punto 1")
-                p2 = self.get_vector_input("punto 2")
-                distance = p1.distance_to(p2)
-                print(f"Distancia entre {p1} y {p2}: {distance:.2f}")
-            elif choice == '8':
-                vectors = []
-                labels = []
-                n = int(input("¿Cuántos vectores desea visualizar? "))
-                for i in range(n):
-                    v = self.get_vector_input(f"vector {i+1}")
-                    vectors.append(v)
-                    labels.append(f"Vector {i+1}")
-                plot_vectors(*vectors, labels=labels)
-            else:
-                print("Opción no válida")
-
-# Para usar la calculadora:
-# calculator = VectorCalculator()
-# calculator.run()
-```
-
----
-
-## 📚 Conceptos Avanzados
-
-### Transformaciones Lineales con Vectores
-
-```python
-class LinearTransformation:
-    """Clase para realizar transformaciones lineales en vectores 2D"""
-    
-    def __init__(self, matrix):
-        """
-        matrix: lista de listas representando una matriz 2x2
-        [[a, b], [c, d]]
-        """
-        self.matrix = matrix
-    
-    def transform(self, vector):
-        """Aplica la transformación lineal al vector"""
-        a, b = self.matrix[0]
-        c, d = self.matrix[1]
-        
-        new_x = a * vector.x + b * vector.y
-        new_y = c * vector.x + d * vector.y
-        
-        return Vector2D(new_x, new_y)
-    
-    def transform_multiple(self, vectors):
-        """Transforma múltiples vectores"""
-        return [self.transform(v) for v in vectors]
-
-# Transformaciones comunes:
-
-# Rotación de 90° en sentido antihorario
-rotation_90 = LinearTransformation([[0, -1], [1, 0]])
-
-# Reflexión sobre el eje x
-reflection_x = LinearTransformation([[1, 0], [0, -1]])
-
-# Escalamiento (2x en x, 0.5x en y)
-scaling = LinearTransformation([[2, 0], [0, 0.5]])
-
-# Ejemplo de uso
-original = Vector2D(3, 4)
-rotated = rotation_90.transform(original)
-reflected = reflection_x.transform(original)
-scaled = scaling.transform(original)
-
-print(f"Original: {original}")
-print(f"Rotado 90°: {rotated}")
-print(f"Reflejado en X: {reflected}")
-print(f"Escalado: {scaled}")
-```
-
 ---
 
 ## 🔗 Referencias y Lectura Adicional
