@@ -13,11 +13,6 @@
 9. [Broadcasting: El Poder de NumPy](#broadcasting-el-poder-de-numpy)
 10. [Funciones Estadísticas](#funciones-estadísticas)
 11. [Álgebra Lineal](#álgebra-lineal)
-12. [NumPy vs Listas de Python](#numpy-vs-listas-de-python)
-13. [Casos Prácticos para Machine Learning](#casos-prácticos-para-machine-learning)
-14. [Optimización y Mejores Prácticas](#optimización-y-mejores-prácticas)
-15. [Errores Comunes y Cómo Evitarlos](#errores-comunes-y-cómo-evitarlos)
-16. [Recursos Adicionales](#recursos-adicionales)
 
 ## ¿Qué es NumPy?
 
